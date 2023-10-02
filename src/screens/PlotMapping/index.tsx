@@ -14,7 +14,12 @@ import {
   TextInput,
   ActivityIndicator,
 } from "react-native";
-import MapView, { Marker, PROVIDER_GOOGLE, Polyline } from "react-native-maps";
+import MapView, {
+  Marker,
+  PROVIDER_GOOGLE,
+  Polyline,
+  Polygon,
+} from "react-native-maps";
 
 import {
   GpsPinIcon,
@@ -71,21 +76,36 @@ const PlotMappingScreen: FC<PlotMappingScreenProps> = ({ navigation }) => {
   const [isGpsStoredSecond, setIsGpsStoredSecond] = useState<boolean>(false);
   const [isGpsStoredThird, setIsGpsStoredThird] = useState<boolean>(false);
   const [isGpsStoredFourth, setIsGpsStoredFourth] = useState<boolean>(false);
+  const [isGpsStoredFifth, setIsGpsStoredFifth] = useState<boolean>(false);
+  const [isGpsStoredSixth, setIsGpsStoredSixth] = useState<boolean>(false);
+  const [isGpsStoredSeventh, setIsGpsStoredSeventh] = useState<boolean>(false);
   const {
     coordinates,
     gpsLocationFirst,
     gpsLocationSecond,
     gpsLocationThird,
+    gpsLocationFourth,
+    gpsLocationFifth,
+    gpsLocationSixth,
     gpsStepFirst,
     gpsStepSecond,
     gpsStepThird,
     gpsStepFourth,
+    gpsStepFifth,
+    gpsStepSixth,
+    gpsStepSeventh,
     setGpsLocationFirst,
     setGpsLocationSecond,
     setGpsLocationThird,
+    setGpsLocationFourth,
+    setGpsLocationFifth,
+    setGpsLocationSixth,
     setGpsStepSecond,
     setGpsStepThird,
     setGpsStepFourth,
+    setGpsStepFifth,
+    setGpsStepSixth,
+    setGpsStepSeventh,
   } = useLocationStore();
 
   const [region, setRegion] = useState({
@@ -243,6 +263,9 @@ const PlotMappingScreen: FC<PlotMappingScreenProps> = ({ navigation }) => {
     setGpsLocationFirst({ latitude: 0, longitude: 0 });
     setGpsLocationSecond({ latitude: 0, longitude: 0 });
     setGpsLocationThird({ latitude: 0, longitude: 0 });
+    setGpsLocationFourth({ latitude: 0, longitude: 0 });
+    setGpsLocationFifth({ latitude: 0, longitude: 0 });
+    setGpsLocationSixth({ latitude: 0, longitude: 0 });
   };
 
   /**
@@ -268,8 +291,40 @@ const PlotMappingScreen: FC<PlotMappingScreenProps> = ({ navigation }) => {
             ? gpsLocationThird?.longitude
             : gpsLocationSecond?.longitude,
         },
+        {
+          latitude: gpsLocationFourth?.latitude
+            ? gpsLocationFourth?.latitude
+            : gpsLocationSecond?.latitude,
+          longitude: gpsLocationFourth?.longitude
+            ? gpsLocationFourth?.longitude
+            : gpsLocationSecond?.longitude,
+        },
+        {
+          latitude: gpsLocationFifth?.latitude
+            ? gpsLocationFifth?.latitude
+            : gpsLocationSecond?.latitude,
+          longitude: gpsLocationFifth?.longitude
+            ? gpsLocationFifth?.longitude
+            : gpsLocationSecond?.longitude,
+        },
+        {
+          latitude: gpsLocationSixth?.latitude
+            ? gpsLocationSixth?.latitude
+            : gpsLocationSecond?.latitude,
+          longitude: gpsLocationSixth?.longitude
+            ? gpsLocationSixth?.longitude
+            : gpsLocationSecond?.longitude,
+        },
       ]),
-    [gpsLocationFirst, gpsLocationSecond, gpsLocationThird]
+    [
+      gpsLocationFirst,
+      gpsLocationSecond,
+      gpsLocationThird,
+      gpsLocationFourth,
+      gpsLocationFifth,
+      gpsLocationSixth,
+      sortPolygonCoordinates,
+    ]
   );
 
   const serverCoordinates = useMemo(
@@ -317,7 +372,6 @@ const PlotMappingScreen: FC<PlotMappingScreenProps> = ({ navigation }) => {
   const fullAddress = getAddressDetails();
 
   const handleCancel = () => {
-    console.log("==UŠLO==1");
     setConfirmModalVisible(false);
     setLocationButtonText(t("confirmMapping"));
   };
@@ -366,21 +420,28 @@ const PlotMappingScreen: FC<PlotMappingScreenProps> = ({ navigation }) => {
     if (location && !isGpsStored && !confirmModalVisible) {
       setLocationButtonText(t("storeLocation"));
     }
-    if (isGpsStored && location && !gpsStepThird) {
+    if (isGpsStored && location && !gpsStepSixth) {
       setLocationButtonText(t("proceedToNextGpsPin"));
       setStoreButtonText(t("locationStored"));
-    } else if (isGpsStored && gpsStepThird && !confirmModalVisible) {
+    } else if (isGpsStored && gpsStepSixth && !confirmModalVisible) {
       setLocationButtonText(t("confirmMapping"));
       setStoreButtonText(t("locationsStored"));
     } else if (
       gpsLocationSecond?.latitude &&
       gpsLocationThird?.latitude &&
+      gpsLocationFourth?.latitude &&
+      gpsLocationFifth?.latitude &&
+      gpsLocationSixth?.latitude &&
       coordinates.length === 0 &&
       confirmModalVisible
     ) {
       setLocationButtonText(t("waiting") + "...");
     } else if (
-      (gpsLocationSecond?.latitude && gpsLocationThird?.latitude) ||
+      (gpsLocationSecond?.latitude &&
+        gpsLocationThird?.latitude &&
+        gpsLocationFourth?.latitude &&
+        gpsLocationFifth?.latitude &&
+        gpsLocationSixth?.latitude) ||
       coordinates.length !== 0
     ) {
       setLocationButtonText(t("farmIsMapped"));
@@ -392,10 +453,13 @@ const PlotMappingScreen: FC<PlotMappingScreenProps> = ({ navigation }) => {
   }, [
     location,
     isGpsStored,
-    gpsStepFourth,
+    gpsStepSixth,
     fetchLocation,
     gpsLocationSecond?.latitude,
     gpsLocationThird?.latitude,
+    gpsLocationFourth?.latitude,
+    gpsLocationFifth?.latitude,
+    gpsLocationSixth?.latitude,
     coordinates?.length,
     changeResetBtn,
   ]);
@@ -417,6 +481,9 @@ const PlotMappingScreen: FC<PlotMappingScreenProps> = ({ navigation }) => {
                   setGpsStepSecond(false);
                   setGpsStepThird(false);
                   setGpsStepFourth(false);
+                  setGpsStepFifth(false);
+                  setGpsStepSixth(false);
+                  setGpsStepSeventh(false);
                   setIsGpsStoredFirst(true);
                   clearLocations();
                 }}
@@ -501,6 +568,9 @@ const PlotMappingScreen: FC<PlotMappingScreenProps> = ({ navigation }) => {
                   setGpsStepSecond(false);
                   setGpsStepThird(false);
                   setGpsStepFourth(false);
+                  setGpsStepFifth(false);
+                  setGpsStepSixth(false);
+                  setGpsStepSeventh(false);
                   setIsGpsStoredFirst(true);
                   setConfirmModalVisible(false);
                   clearLocations();
@@ -694,6 +764,142 @@ const PlotMappingScreen: FC<PlotMappingScreenProps> = ({ navigation }) => {
                 {t("gpsPinThree")}
               </Text>
             </View>
+            <View style={localStyles.gpsLineDiv}>
+              <View
+                style={[
+                  localStyles.gpsDiv,
+                  {
+                    backgroundColor:
+                      gpsStepFirst && gpsStepThird && gpsStepFourth
+                        ? theme.darkBlue
+                        : theme.rgba.lightGray,
+                  },
+                ]}
+              ></View>
+            </View>
+            <View style={localStyles.gpsIconDiv}>
+              {(gpsStepFirst &&
+                gpsStepSecond &&
+                gpsStepThird &&
+                gpsStepFourth) ||
+              coordinates.length !== 0 ? (
+                <GpsPinIcon width={15} height={15} />
+              ) : (
+                <GpsPinSilverIcon width={15} height={15} />
+              )}
+              <Text
+                style={[
+                  textStyles.smaller,
+                  {
+                    color:
+                      (gpsStepFirst &&
+                        gpsStepSecond &&
+                        gpsStepThird &&
+                        gpsStepFourth) ||
+                      coordinates.length !== 0
+                        ? theme.darkBlue
+                        : theme.rgba.lightGray,
+                  },
+                ]}
+              >
+                {t("gpsPinFour")}
+              </Text>
+            </View>
+            <View style={localStyles.gpsLineDiv}>
+              <View
+                style={[
+                  localStyles.gpsDiv,
+                  {
+                    backgroundColor:
+                      gpsStepFirst &&
+                      gpsStepThird &&
+                      gpsStepFourth &&
+                      gpsStepFifth
+                        ? theme.darkBlue
+                        : theme.rgba.lightGray,
+                  },
+                ]}
+              ></View>
+            </View>
+            <View style={localStyles.gpsIconDiv}>
+              {(gpsStepFirst &&
+                gpsStepSecond &&
+                gpsStepThird &&
+                gpsStepFourth &&
+                gpsStepFifth) ||
+              coordinates.length !== 0 ? (
+                <GpsPinIcon width={15} height={15} />
+              ) : (
+                <GpsPinSilverIcon width={15} height={15} />
+              )}
+              <Text
+                style={[
+                  textStyles.smaller,
+                  {
+                    color:
+                      (gpsStepFirst &&
+                        gpsStepSecond &&
+                        gpsStepThird &&
+                        gpsStepFourth &&
+                        gpsStepFifth) ||
+                      coordinates.length !== 0
+                        ? theme.darkBlue
+                        : theme.rgba.lightGray,
+                  },
+                ]}
+              >
+                {t("gpsPinFifth")}
+              </Text>
+            </View>
+            <View style={localStyles.gpsLineDiv}>
+              <View
+                style={[
+                  localStyles.gpsDiv,
+                  {
+                    backgroundColor:
+                      gpsStepFirst &&
+                      gpsStepThird &&
+                      gpsStepFourth &&
+                      gpsStepFifth &&
+                      gpsStepSixth
+                        ? theme.darkBlue
+                        : theme.rgba.lightGray,
+                  },
+                ]}
+              ></View>
+            </View>
+            <View style={localStyles.gpsIconDiv}>
+              {(gpsStepFirst &&
+                gpsStepSecond &&
+                gpsStepThird &&
+                gpsStepFourth &&
+                gpsStepFifth &&
+                gpsStepSixth) ||
+              coordinates.length !== 0 ? (
+                <GpsPinIcon width={15} height={15} />
+              ) : (
+                <GpsPinSilverIcon width={15} height={15} />
+              )}
+              <Text
+                style={[
+                  textStyles.smaller,
+                  {
+                    color:
+                      (gpsStepFirst &&
+                        gpsStepSecond &&
+                        gpsStepThird &&
+                        gpsStepFourth &&
+                        gpsStepFifth &&
+                        gpsStepSixth) ||
+                      coordinates.length !== 0
+                        ? theme.darkBlue
+                        : theme.rgba.lightGray,
+                  },
+                ]}
+              >
+                {t("gpsPinSixth")}
+              </Text>
+            </View>
           </View>
         </Box>
       </Center>
@@ -732,7 +938,7 @@ const PlotMappingScreen: FC<PlotMappingScreenProps> = ({ navigation }) => {
               longitudeDelta: 0.0001,
             }}
           >
-            {coordinates.length === 0 && !gpsLocationThird?.latitude ? (
+            {coordinates.length === 0 && !gpsLocationSixth?.latitude ? (
               markerCoords?.latitude !== 0 && markerCoords?.longitude !== 0 ? (
                 <Marker
                   draggable
@@ -790,6 +996,30 @@ const PlotMappingScreen: FC<PlotMappingScreenProps> = ({ navigation }) => {
                 >
                   <MarkerIcon />
                 </Marker>
+                <Marker
+                  coordinate={{
+                    latitude: serverCoordinates[3]?.latitude,
+                    longitude: serverCoordinates[3]?.longitude,
+                  }}
+                >
+                  <MarkerIcon />
+                </Marker>
+                <Marker
+                  coordinate={{
+                    latitude: serverCoordinates[4]?.latitude,
+                    longitude: serverCoordinates[4]?.longitude,
+                  }}
+                >
+                  <MarkerIcon />
+                </Marker>
+                <Marker
+                  coordinate={{
+                    latitude: serverCoordinates[5]?.latitude,
+                    longitude: serverCoordinates[5]?.longitude,
+                  }}
+                >
+                  <MarkerIcon />
+                </Marker>
               </>
             )}
 
@@ -830,8 +1060,66 @@ const PlotMappingScreen: FC<PlotMappingScreenProps> = ({ navigation }) => {
                   <MarkerIcon />
                 </Marker>
               )}
+            {gpsLocationFourth?.latitude !== 0 &&
+              gpsLocationFourth?.longitude !== 0 &&
+              serverCoordinates.length === 0 && (
+                <Marker
+                  coordinate={{
+                    latitude: gpsLocationFourth?.latitude,
+                    longitude: gpsLocationFourth?.longitude,
+                  }}
+                >
+                  <MarkerIcon />
+                </Marker>
+              )}
+            {gpsLocationFifth?.latitude !== 0 &&
+              gpsLocationFifth?.longitude !== 0 &&
+              serverCoordinates.length === 0 && (
+                <Marker
+                  coordinate={{
+                    latitude: gpsLocationFifth?.latitude,
+                    longitude: gpsLocationFifth?.longitude,
+                  }}
+                >
+                  <MarkerIcon />
+                </Marker>
+              )}
+            {gpsLocationSixth?.latitude !== 0 &&
+              gpsLocationSixth?.longitude !== 0 &&
+              serverCoordinates.length === 0 && (
+                <Marker
+                  coordinate={{
+                    latitude: gpsLocationSixth?.latitude,
+                    longitude: gpsLocationSixth?.longitude,
+                  }}
+                >
+                  <MarkerIcon />
+                </Marker>
+              )}
 
-            <Polyline
+            {gpsLocationFirst?.latitude !== 0 &&
+              gpsLocationFirst?.longitude !== 0 &&
+              gpsLocationSecond?.latitude !== 0 &&
+              gpsLocationSecond.longitude !== 0 &&
+              coordinates.length === 0 && (
+                <Polygon
+                  coordinates={squareCoordinates}
+                  strokeWidth={2}
+                  strokeColor={theme.darkBlue}
+                  fillColor={theme.darkBlue}
+                />
+              )}
+
+            {coordinates.length !== 0 && (
+              <Polygon
+                coordinates={serverCoordinates}
+                strokeWidth={2}
+                strokeColor={theme.darkBlue}
+                fillColor={theme.darkBlue}
+              />
+            )}
+
+            {/* <Polyline
               coordinates={[
                 {
                   latitude: gpsLocationFirst.latitude
@@ -864,7 +1152,7 @@ const PlotMappingScreen: FC<PlotMappingScreenProps> = ({ navigation }) => {
               ]}
               strokeColor={theme.darkBlue}
               strokeWidth={2}
-            />
+            /> */}
           </MapView>
         ) : (
           <Center
@@ -969,6 +1257,33 @@ const PlotMappingScreen: FC<PlotMappingScreenProps> = ({ navigation }) => {
                     latitude: latitude ? latitude : 0,
                     longitude: longitude ? longitude : 0,
                   });
+                }
+                if (gpsStepFourth && isGpsStoredFourth) {
+                  setIsGpsStored(true);
+                  setIsGpsStoredFifth(true);
+                  setIsGpsStoredFourth(false);
+                  setGpsLocationFourth({
+                    latitude: latitude ? latitude : 0,
+                    longitude: longitude ? longitude : 0,
+                  });
+                }
+                if (gpsStepFifth && isGpsStoredFifth) {
+                  setIsGpsStored(true);
+                  setIsGpsStoredSixth(true);
+                  setIsGpsStoredFifth(false);
+                  setGpsLocationFifth({
+                    latitude: latitude ? latitude : 0,
+                    longitude: longitude ? longitude : 0,
+                  });
+                }
+                if (gpsStepSixth && isGpsStoredSixth) {
+                  setIsGpsStored(true);
+                  setIsGpsStoredSeventh(true);
+                  setIsGpsStoredSixth(false);
+                  setGpsLocationSixth({
+                    latitude: latitude ? latitude : 0,
+                    longitude: longitude ? longitude : 0,
+                  });
                   setConfirmModalVisible(true);
                 }
               } else if (locationButtonText === t("confirmMapping")) {
@@ -1007,6 +1322,51 @@ const PlotMappingScreen: FC<PlotMappingScreenProps> = ({ navigation }) => {
                     longitude: 0,
                   });
                   setGpsStepFourth(true);
+                  setIsGpsStored(false);
+                }
+                if (
+                  gpsStepFirst &&
+                  gpsStepSecond &&
+                  gpsStepThird &&
+                  gpsStepFourth &&
+                  gpsLocationFourth?.latitude
+                ) {
+                  setMarkerCoords({
+                    latitude: 0,
+                    longitude: 0,
+                  });
+                  setGpsStepFifth(true);
+                  setIsGpsStored(false);
+                }
+                if (
+                  gpsStepFirst &&
+                  gpsStepSecond &&
+                  gpsStepThird &&
+                  gpsStepFourth &&
+                  gpsStepFifth &&
+                  gpsLocationFifth?.latitude
+                ) {
+                  setMarkerCoords({
+                    latitude: 0,
+                    longitude: 0,
+                  });
+                  setGpsStepSixth(true);
+                  setIsGpsStored(false);
+                }
+                if (
+                  gpsStepFirst &&
+                  gpsStepSecond &&
+                  gpsStepThird &&
+                  gpsStepFourth &&
+                  gpsStepFifth &&
+                  gpsStepSixth &&
+                  gpsLocationSixth?.latitude
+                ) {
+                  setMarkerCoords({
+                    latitude: 0,
+                    longitude: 0,
+                  });
+                  setGpsStepSeventh(true);
                   setIsGpsStored(false);
                 }
               }
@@ -1089,7 +1449,7 @@ const localStyles = StyleSheet.create({
   gpsLineDiv: {
     justifyContent: "center",
     alignItems: "center",
-    width: "27%",
+    width: 7,
     height: 50,
   },
   modalErrorDiv: {

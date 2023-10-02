@@ -7,7 +7,6 @@ import React, { FC, useEffect, useState } from "react";
 import { SafeAreaView, StyleSheet } from "react-native";
 
 import { RightIcon, DownIcon } from "../../../assets/images/svg";
-import { db } from "../../../firebaseConfig.js";
 import { Divider, MainHeader, DropDownPicker } from "../../components";
 import { bodyStyles, textStyles } from "../../globalStyles";
 import useTheme from "../../hooks/useTheme";
